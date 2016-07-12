@@ -146,7 +146,7 @@
            }
            else
            {
-               NSLog(@"Database access enabled when on directory.");
+               NSLog(@"Database access enabled when locked on directory.");
            }
 
           if(![[NSFileManager defaultManager] setAttributes:attributes
