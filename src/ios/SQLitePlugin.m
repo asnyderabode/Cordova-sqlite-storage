@@ -135,6 +135,31 @@
             sqlite3 *db;
 
             DLog(@"open full db path: %@", dbname);
+            
+           NSDictionary *attributes = @{NSFileProtectionKey: NSFileProtectionNone};
+           NSError *error;
+           if(![[NSFileManager defaultManager] setAttributes:attributes
+                                                ofItemAtPath:[appDBPaths objectForKey:dblocation]
+                                                       error:&error])
+           {
+               NSLog(@"DATABASE WARNING! Database access was not enabled on directory because of an error: %@", [error localizedDescription]);
+           }
+           else
+           {
+               NSLog(@"Database access enabled when on directory.");
+           }
+
+          if(![[NSFileManager defaultManager] setAttributes:attributes
+                                               ofItemAtPath:dbname
+                                                      error:&error])
+          {
+              NSLog(@"DATABASE WARNING! Database access was not enabled because of an error: %@", [error localizedDescription]);
+          }
+          else
+          {
+              NSLog(@"Database access enabled when locked.");
+          }
+
 
             if (sqlite3_open(name, &db) != SQLITE_OK) {
                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Unable to open DB"];
