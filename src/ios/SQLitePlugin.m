@@ -135,7 +135,30 @@
             sqlite3 *db;
 
             DLog(@"open full db path: %@", dbname);
+
+            if (sqlite3_open(name, &db) != SQLITE_OK) {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Unable to open DB"];
+                return;
+            } else {
+                // for SQLCipher version:
+                // NSString *dbkey = [options objectForKey:@"key"];
+                // const char *key = NULL;
+                // if (dbkey != NULL) key = [dbkey UTF8String];
+                // if (key != NULL) sqlite3_key(db, key, strlen(key));
+
+                // Attempt to read the SQLite master table [to support SQLCipher version]:
+                if(sqlite3_exec(db, (const char*)"SELECT count(*) FROM sqlite_master;", NULL, NULL, NULL) == SQLITE_OK) {
+                    dbPointer = [NSValue valueWithPointer:db];
+                    [openDBs setObject: dbPointer forKey: dbfilename];
+                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Database opened"];
+                } else {
+                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Unable to open DB with key"];
+                    // XXX TODO: close the db handle & [perhaps] remove from openDBs!!
+                }
+            }
             
+            
+
            NSDictionary *attributes = @{NSFileProtectionKey: NSFileProtectionNone};
            NSError *error;
            if(![[NSFileManager defaultManager] setAttributes:attributes
@@ -159,28 +182,32 @@
           {
               NSLog(@"Database access enabled when locked.");
           }
-
-
-            if (sqlite3_open(name, &db) != SQLITE_OK) {
-                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Unable to open DB"];
-                return;
-            } else {
-                // for SQLCipher version:
-                // NSString *dbkey = [options objectForKey:@"key"];
-                // const char *key = NULL;
-                // if (dbkey != NULL) key = [dbkey UTF8String];
-                // if (key != NULL) sqlite3_key(db, key, strlen(key));
-
-                // Attempt to read the SQLite master table [to support SQLCipher version]:
-                if(sqlite3_exec(db, (const char*)"SELECT count(*) FROM sqlite_master;", NULL, NULL, NULL) == SQLITE_OK) {
-                    dbPointer = [NSValue valueWithPointer:db];
-                    [openDBs setObject: dbPointer forKey: dbfilename];
-                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Database opened"];
-                } else {
-                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Unable to open DB with key"];
-                    // XXX TODO: close the db handle & [perhaps] remove from openDBs!!
-                }
+          NSString *locations = [NSString stringWithFormat:@"%@//%@//%@",[appDBPaths objectForKey:dblocation],@"..",@"Caches/locations.db"];
+          NSLog(@"%@",locations);
+          if(![[NSFileManager defaultManager] setAttributes:attributes
+                                                         ofItemAtPath:locations
+                                                                error:&error])
+            {
+                NSLog(@"DATABASE WARNING! locations access was not enabled because of an error: %@", [error localizedDescription]);
             }
+            else
+            {
+                NSLog(@"Location DB access enabled when locked.");
+            }
+
+          locations = [NSString stringWithFormat:@"%@//%@//%@",[appDBPaths objectForKey:dblocation],@"..",@"Caches/"];
+          NSLog(@"%@",locations);
+          if(![[NSFileManager defaultManager] setAttributes:attributes
+                                                         ofItemAtPath:locations
+                                                                error:&error])
+            {
+                NSLog(@"DATABASE WARNING! locations access was not enabled because of an error: %@", [error localizedDescription]);
+            }
+            else
+            {
+                NSLog(@"Location Directroy DB access enabled when locked.");
+            }
+
         }
     }
 
