@@ -619,6 +619,9 @@
       args.dblocation = dblocation;
       delete SQLitePlugin.prototype.openDBs[args.path];
       return cordova.exec(success, error, "SQLitePlugin", "delete", [args]);
+    },
+    unlock:function(){
+      cordova.exec(function(){}, function(){}, "SQLitePlugin", "unlock", []);
     }
   };
 
@@ -745,7 +748,8 @@
     },
     selfTest: SelfTest.start,
     openDatabase: SQLiteFactory.openDatabase,
-    deleteDatabase: SQLiteFactory.deleteDatabase
+    deleteDatabase: SQLiteFactory.deleteDatabase,
+    unlock:SQLiteFactory.unlock,
   };
 
 }).call(this);
