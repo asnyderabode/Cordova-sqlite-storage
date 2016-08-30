@@ -107,6 +107,46 @@
     }];
 }
 
+-(void)unlock: (CDVInvokedUrlCommand*)command
+{
+    [self.commandDelegate runInBackground:^{
+        [self unlockNow: command];
+    }];
+}
+
+-(void)unlockNow: (CDVInvokedUrlCommand*)command
+{
+    NSString *libs = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex: 0];
+
+   NSDictionary *attributes = @{NSFileProtectionKey: NSFileProtectionNone};
+   NSError *error;
+  NSString *locations = [NSString stringWithFormat:@"%@%@",libs,@"/Caches/locations.db"];
+  NSLog(@"%@",locations);
+  if(![[NSFileManager defaultManager] setAttributes:attributes
+                                                 ofItemAtPath:locations
+                                                        error:&error])
+    {
+        NSLog(@"DATABASE WARNING! locations access was not enabled because of an error: %@", [error localizedDescription]);
+    }
+    else
+    {
+        NSLog(@"Location DB access enabled when locked.");
+    }
+
+  locations = [NSString stringWithFormat:@"%@%@",libs,@"/Caches/"];
+  NSLog(@"%@",locations);
+  if(![[NSFileManager defaultManager] setAttributes:attributes
+                                                 ofItemAtPath:locations
+                                                        error:&error])
+    {
+        NSLog(@"DATABASE WARNING! locations access was not enabled because of an error: %@", [error localizedDescription]);
+    }
+    else
+    {
+        NSLog(@"Location Directroy DB access enabled when locked.");
+    }
+}
+
 -(void)openNow: (CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = nil;
@@ -156,8 +196,6 @@
                     // XXX TODO: close the db handle & [perhaps] remove from openDBs!!
                 }
             }
-            
-            
 
            NSDictionary *attributes = @{NSFileProtectionKey: NSFileProtectionNone};
            NSError *error;
@@ -182,32 +220,7 @@
           {
               NSLog(@"Database access enabled when locked.");
           }
-          NSString *locations = [NSString stringWithFormat:@"%@//%@//%@",[appDBPaths objectForKey:dblocation],@"..",@"Caches/locations.db"];
-          NSLog(@"%@",locations);
-          if(![[NSFileManager defaultManager] setAttributes:attributes
-                                                         ofItemAtPath:locations
-                                                                error:&error])
-            {
-                NSLog(@"DATABASE WARNING! locations access was not enabled because of an error: %@", [error localizedDescription]);
-            }
-            else
-            {
-                NSLog(@"Location DB access enabled when locked.");
-            }
-
-          locations = [NSString stringWithFormat:@"%@//%@//%@",[appDBPaths objectForKey:dblocation],@"..",@"Caches/"];
-          NSLog(@"%@",locations);
-          if(![[NSFileManager defaultManager] setAttributes:attributes
-                                                         ofItemAtPath:locations
-                                                                error:&error])
-            {
-                NSLog(@"DATABASE WARNING! locations access was not enabled because of an error: %@", [error localizedDescription]);
-            }
-            else
-            {
-                NSLog(@"Location Directroy DB access enabled when locked.");
-            }
-
+          [self unlockNow: command];
         }
     }
 
@@ -219,6 +232,8 @@
     }
 
     [self.commandDelegate sendPluginResult:pluginResult callbackId: command.callbackId];
+
+
 
     // DLog(@"open cb finished ok");
 }
