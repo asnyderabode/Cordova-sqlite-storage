@@ -143,6 +143,8 @@ public class SQLitePlugin extends CordovaPlugin {
                     }
                 }
                 break;
+            case unlock:
+                break;
         }
 
         return status;
@@ -424,6 +426,7 @@ public class SQLitePlugin extends CordovaPlugin {
         delete,
         executeSqlBatch,
         backgroundExecuteSqlBatch,
+        unlock,
     }
 }
 
