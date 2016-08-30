@@ -34,10 +34,12 @@ typedef int WebSQLError;
 -(void) echoStringValue: (CDVInvokedUrlCommand*)command;
 
 // Open / Close / Delete
+-(void) unlock: (CDVInvokedUrlCommand*)command;
 -(void) open: (CDVInvokedUrlCommand*)command;
 -(void) close: (CDVInvokedUrlCommand*)command;
 -(void) delete: (CDVInvokedUrlCommand*)command;
 
+-(void) unlockNow: (CDVInvokedUrlCommand*)command;
 -(void) openNow: (CDVInvokedUrlCommand*)command;
 -(void) closeNow: (CDVInvokedUrlCommand*)command;
 -(void) deleteNow: (CDVInvokedUrlCommand*)command;
